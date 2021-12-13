@@ -44,9 +44,9 @@ defmodule Advent do
 
   def day2a() do
     {x, y} =
-    File.read!("day1.txt")
+    File.read!("day2.txt")
     |> String.split("\n")
-    |> Enum.map(&String.split(" "))
+    |> Enum.map(fn line -> String.split(line, " ") end)
 
     |> Enum.reduce(
       {0, 0},
@@ -54,6 +54,7 @@ defmodule Advent do
         (["forward", value], {x, y}) -> {x + String.to_integer(value), y}
         (["down", value], {x, y}) -> {x, y + String.to_integer(value)}
         (["up", value], {x, y}) -> {x, y - String.to_integer(value)}
+      end
     )
 
     x * y
