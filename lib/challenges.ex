@@ -157,9 +157,9 @@ defmodule Advent do
       def solve(data) do
         {gamma, epsilon} =
         data
-        |> List.zip()
+        |> List.zip() # Convert columns to rows
         |> Enum.map(&Tuple.to_list/1)
-        |> Enum.map(fn digit_list ->
+        |> Enum.map(fn digit_list -> # Replace each list with a tuple of {zeros, ones}
           Enum.reduce(
             digit_list,
             {0,0},
@@ -171,14 +171,14 @@ defmodule Advent do
             end
           )
         end)
-        |> Enum.map(fn {zeros, ones} -> 
+        |> Enum.map(fn {zeros, ones} -> # Replace each tuple with the most popular digit
             case zeros > ones do
               true -> "0"
               false -> "1"
             end
           end
         )
-        |> Day3.gamma_and_epsilon
+        |> Day3.gamma_and_epsilon # decimal conversion
         
         gamma * epsilon
       end
@@ -215,12 +215,14 @@ defmodule Advent do
         filter_by_most_popular(data, 0)
       end
       def filter_by_most_popular([last], index) do
-        IO.puts("most at #{index}: #{last}")
         last
       end
       def filter_by_most_popular(data, index) do
+        filter_by_most_popular(data, index, most_popular_at_index(data, index))
+      end
+      def filter_by_most_popular(data, index, filter_value) do
         data
-        |> Enum.filter(fn digits -> Enum.at(digits, index) === most_popular_at_index(data, index) end)
+        |> Enum.filter(fn digits -> Enum.at(digits, index) === filter_value end)
         |> filter_by_most_popular(index + 1)
       end
       
@@ -253,16 +255,16 @@ defmodule Advent do
         filter_by_least_popular(data, 0)
       end
       def filter_by_least_popular([last], index) do
-        IO.puts("least at #{index}: #{last}")
         last
       end
       def filter_by_least_popular(data, index) do
+        filter_by_least_popular(data, index, least_popular_at_index(data, index))
+      end
+      def filter_by_least_popular(data, index, filter_value) do
         data
-        |> Enum.filter(fn digits -> Enum.at(digits, index) === least_popular_at_index(data, index) end)
+        |> Enum.filter(fn digits -> Enum.at(digits, index) === filter_value end)
         |> filter_by_least_popular(index + 1)
       end
-
-
 
       def solve(data) do
         generator = 
