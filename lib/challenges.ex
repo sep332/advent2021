@@ -101,6 +101,7 @@ defmodule Advent do
     def real_data() do
       File.read!("day3.txt")
       |> String.split("\n")
+      |> Enum.map(fn line -> String.split(line, "", trim: true) end)
     end
 
     def test_data() do
@@ -117,6 +118,7 @@ defmodule Advent do
 00010
 01010"
       |> String.split("\n")
+      |> Enum.map(fn line -> String.split(line, "", trim: true) end)
     end
 
     def test_answer() do
@@ -155,7 +157,6 @@ defmodule Advent do
       def solve(data) do
         {gamma, epsilon} =
         data
-        |> Enum.map(fn line -> String.split(line, "", trim: true) end)
         |> List.zip()
         |> Enum.map(&Tuple.to_list/1)
         |> Enum.map(fn digit_list ->
@@ -180,6 +181,103 @@ defmodule Advent do
         |> Day3.gamma_and_epsilon
         
         gamma * epsilon
+      end
+    end
+
+    defmodule B do
+
+      def most_popular(data) do
+        data
+        |> most_popular({0,0})
+      end
+      def most_popular(["0" | rest], {zeros, ones}) do
+        most_popular(rest, {zeros + 1, ones})
+      end
+      def most_popular(["1" | rest], {zeros, ones}) do
+        most_popular(rest, {zeros, ones + 1})
+      end
+      def most_popular([], {zeros, ones}) when zeros > ones do
+        "0"
+      end
+      def most_popular([], _) do
+        "1"
+      end
+
+      def most_popular_at_index([_|_] = data, index) do
+        data
+        |> List.zip()
+        |> Enum.map(fn x -> Tuple.to_list(x) end)
+        |> Enum.at(index)
+        |> most_popular()
+      end
+
+      def filter_by_most_popular(data) do
+        filter_by_most_popular(data, 0)
+      end
+      def filter_by_most_popular([last], index) do
+        IO.puts("most at #{index}: #{last}")
+        last
+      end
+      def filter_by_most_popular(data, index) do
+        data
+        |> Enum.filter(fn digits -> Enum.at(digits, index) === most_popular_at_index(data, index) end)
+        |> filter_by_most_popular(index + 1)
+      end
+      
+      def least_popular(data) do
+        data
+        |> least_popular({0,0})
+      end
+      def least_popular(["0" | rest], {zeros, ones}) do
+        least_popular(rest, {zeros + 1, ones})
+      end
+      def least_popular(["1" | rest], {zeros, ones}) do
+        least_popular(rest, {zeros, ones + 1})
+      end
+      def least_popular([], {zeros, ones}) when zeros > ones do
+        "1"
+      end
+      def least_popular([], _) do
+        "0"
+      end
+
+      def least_popular_at_index([_|_] = data, index) do
+        data
+        |> List.zip()
+        |> Enum.map(fn x -> Tuple.to_list(x) end)
+        |> Enum.at(index)
+        |> least_popular()
+      end
+
+      def filter_by_least_popular(data) do
+        filter_by_least_popular(data, 0)
+      end
+      def filter_by_least_popular([last], index) do
+        IO.puts("least at #{index}: #{last}")
+        last
+      end
+      def filter_by_least_popular(data, index) do
+        data
+        |> Enum.filter(fn digits -> Enum.at(digits, index) === least_popular_at_index(data, index) end)
+        |> filter_by_least_popular(index + 1)
+      end
+
+
+
+      def solve(data) do
+        generator = 
+        data
+        |> filter_by_most_popular
+        |> Enum.join("")
+        |> Advent.Day3.bin_to_dec
+
+        scrubber = 
+        data
+        |> filter_by_least_popular
+        |> Enum.join("")
+        |> Advent.Day3.bin_to_dec
+
+        generator * scrubber
       end
     end
   end
