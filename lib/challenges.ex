@@ -150,6 +150,7 @@ defmodule Advent do
         0,
         fn (digit, dec) -> String.to_integer(digit) + (2 * dec) end
       )
+      |> IO.inspect(label: "converted to decimal")
     end
 
     defmodule A do
@@ -186,100 +187,103 @@ defmodule Advent do
 
     defmodule B do
 
-      def most_popular(data) do
-        data
-        |> most_popular({0,0})
+      def most_popular(values) do
+        values
+        |> frequencies # could be replaced with Enum.frequencies if you have Elixir >= 1.10
+        |> most_popular_value
       end
-      def most_popular(["0" | rest], {zeros, ones}) do
-        most_popular(rest, {zeros + 1, ones})
+
+      def least_popular(values) do
+        values
+        |> IO.inspect(label: "least popular values")
+        |> frequencies
+        |> least_popular_value
       end
-      def most_popular(["1" | rest], {zeros, ones}) do
-        most_popular(rest, {zeros, ones + 1})
+
+      def frequencies(values, counts \\ %{"0": 0, "1": 0})
+      def frequencies(["0" | rest], %{"0": zeros, "1": ones}) do
+        frequencies(rest, %{"0": zeros + 1, "1": ones})
       end
-      def most_popular([], {zeros, ones}) when zeros > ones do
+      def frequencies(["1" | rest], %{"0": zeros, "1": ones}) do
+        frequencies(rest, %{"0": zeros, "1": ones + 1})
+      end
+      def frequencies([], counts) do
+        counts
+      end
+
+      def most_popular_value(%{"0": zeros, "1": ones}) when zeros > ones do
         "0"
       end
-      def most_popular([], _) do
-        "1"
-      end
+      def most_popular_value(_), do: "1"
 
-      def most_popular_at_index([_|_] = data, index) do
-        data
-        |> List.zip()
-        |> Enum.map(fn x -> Tuple.to_list(x) end)
-        |> Enum.at(index)
-        |> most_popular()
-      end
-
-      def filter_by_most_popular(data) do
-        filter_by_most_popular(data, 0)
-      end
-      def filter_by_most_popular([last], index) do
-        last
-      end
-      def filter_by_most_popular(data, index) do
-        filter_by_most_popular(data, index, most_popular_at_index(data, index))
-      end
-      def filter_by_most_popular(data, index, filter_value) do
-        data
-        |> Enum.filter(fn digits -> Enum.at(digits, index) === filter_value end)
-        |> filter_by_most_popular(index + 1)
-      end
-      
-      def least_popular(data) do
-        data
-        |> least_popular({0,0})
-      end
-      def least_popular(["0" | rest], {zeros, ones}) do
-        least_popular(rest, {zeros + 1, ones})
-      end
-      def least_popular(["1" | rest], {zeros, ones}) do
-        least_popular(rest, {zeros, ones + 1})
-      end
-      def least_popular([], {zeros, ones}) when zeros > ones do
-        "1"
-      end
-      def least_popular([], _) do
+      def least_popular_value(%{"0": zeros, "1": ones}) when zeros <= ones do
         "0"
       end
+      def least_popular_value(_), do: "1"
 
-      def least_popular_at_index([_|_] = data, index) do
-        data
-        |> List.zip()
-        |> Enum.map(fn x -> Tuple.to_list(x) end)
-        |> Enum.at(index)
-        |> least_popular()
+      def most_and_least_popular_at_index({most_data, least_data}, index) do
+        {
+          most_data
+          |> List.zip()
+          |> Enum.map(&Tuple.to_list/1)
+          |> Enum.at(index)
+          |> most_popular,
+
+          least_data
+          |> List.zip()
+          |> Enum.map(&Tuple.to_list/1)
+          |> Enum.at(index)
+          |> least_popular
+        }
       end
 
-      def filter_by_least_popular(data) do
-        filter_by_least_popular(data, 0)
+      def filter_by_most_and_least_popular(data, index \\ 0)
+      def filter_by_most_and_least_popular({[last], [also_last]}, _index) do
+        {[last], [also_last]}
       end
-      def filter_by_least_popular([last], index) do
-        last
-      end
-      def filter_by_least_popular(data, index) do
-        filter_by_least_popular(data, index, least_popular_at_index(data, index))
-      end
-      def filter_by_least_popular(data, index, filter_value) do
+      def filter_by_most_and_least_popular({[last], _} = data, index) do
+        {_most_value, least_value} =
+        most_and_least_popular_at_index(data, index)
+
         data
-        |> Enum.filter(fn digits -> Enum.at(digits, index) === filter_value end)
-        |> filter_by_least_popular(index + 1)
+        |> filter_by_most_and_least_popular(index, {Enum.at(last, index), least_value})
+      end
+      def filter_by_most_and_least_popular({_, [last]} = data, index) do
+        {most_value, _least_value} =
+        most_and_least_popular_at_index(data, index)
+
+        data
+        |> filter_by_most_and_least_popular(index, {most_value, Enum.at(last, index)})
+      end
+      def filter_by_most_and_least_popular(data, index) do
+        IO.inspect(data, label: "should be tuple")
+        filter_by_most_and_least_popular(data, index, most_and_least_popular_at_index(data, index))
+      end
+      def filter_by_most_and_least_popular({most_data, least_data}, index, {most_value, least_value}) do
+        {
+          most_data
+          |> Enum.filter(fn digits -> Enum.at(digits, index) === most_value end),
+          least_data
+          |> Enum.filter(fn digits -> Enum.at(digits, index) === least_value end)
+        }
+        |> filter_by_most_and_least_popular(index + 1)
       end
 
       def solve(data) do
-        generator = 
-        data
-        |> filter_by_most_popular
-        |> Enum.join("")
-        |> Advent.Day3.bin_to_dec
+        {generator_bits, scrubber_bits} = 
+        {data, data}
+        |> filter_by_most_and_least_popular
 
-        scrubber = 
-        data
-        |> filter_by_least_popular
+        (generator_bits
         |> Enum.join("")
-        |> Advent.Day3.bin_to_dec
+        |> Advent.Day3.bin_to_dec)
 
-        generator * scrubber
+        *
+
+        (scrubber_bits
+        |> Enum.join("")
+        |> Advent.Day3.bin_to_dec)
+
       end
     end
   end
