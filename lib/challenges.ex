@@ -150,7 +150,6 @@ defmodule Advent do
         0,
         fn (digit, dec) -> String.to_integer(digit) + (2 * dec) end
       )
-      |> IO.inspect(label: "converted to decimal")
     end
 
     defmodule A do
@@ -195,7 +194,6 @@ defmodule Advent do
 
       def least_popular(values) do
         values
-        |> IO.inspect(label: "least popular values")
         |> frequencies
         |> least_popular_value
       end
@@ -256,7 +254,6 @@ defmodule Advent do
         |> filter_by_most_and_least_popular(index, {most_value, Enum.at(last, index)})
       end
       def filter_by_most_and_least_popular(data, index) do
-        IO.inspect(data, label: "should be tuple")
         filter_by_most_and_least_popular(data, index, most_and_least_popular_at_index(data, index))
       end
       def filter_by_most_and_least_popular({most_data, least_data}, index, {most_value, least_value}) do
