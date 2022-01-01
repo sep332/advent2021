@@ -28,7 +28,7 @@ defmodule Advent do
 
     defmodule B do
         
-      def day1b(data) do
+      def solve(data) do
         {answer, _, _} =
 
         data
@@ -79,7 +79,7 @@ defmodule Advent do
 
     defmodule B do
       
-      def day2b(data) do
+      def solve(data) do
         {x, y, _aim} = 
         
         data
