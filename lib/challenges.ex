@@ -236,16 +236,11 @@ defmodule Advent do
       end
 
       def filter_by_most_and_least_popular(data, index \\ 0)
-      def filter_by_most_and_least_popular({[last], [also_last]}, _index) do
-        {[last], [also_last]}
-      end
-      def filter_by_most_and_least_popular({[last], _} = data, index) do
-        {_most_value, least_value} =
-        most_and_least_popular_at_index(data, index)
-
+      def filter_by_most_and_least_popular({[_last], [_also_last]} = data, _index) do
         data
-        |> filter_by_most_and_least_popular(index, {Enum.at(last, index), least_value})
       end
+
+      # Gotta cheat here for least poular when only one is left so it doesn't get filtered out
       def filter_by_most_and_least_popular({_, [last]} = data, index) do
         {most_value, _least_value} =
         most_and_least_popular_at_index(data, index)
@@ -268,18 +263,18 @@ defmodule Advent do
 
       def solve(data) do
         {generator_bits, scrubber_bits} = 
-        {data, data}
-        |> filter_by_most_and_least_popular
+          {data, data}
+          |> filter_by_most_and_least_popular
 
-        (generator_bits
-        |> Enum.join("")
-        |> Advent.Day3.bin_to_dec)
+        ( generator_bits
+          |> Enum.join("")
+          |> Advent.Day3.bin_to_dec )
 
         *
 
-        (scrubber_bits
-        |> Enum.join("")
-        |> Advent.Day3.bin_to_dec)
+        ( scrubber_bits
+          |> Enum.join("")
+          |> Advent.Day3.bin_to_dec )
 
       end
     end
