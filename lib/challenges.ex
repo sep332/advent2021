@@ -6,15 +6,30 @@ defmodule Advent do
       |> Enum.map(&String.to_integer/1)
     end
 
+    def test_data do
+      """
+      199
+      200
+      208
+      210
+      200
+      207
+      240
+      269
+      260
+      263\
+      """
+    end
+
     defmodule A do
-        
+
       def solve(data) do
         {answer, _} =
-        
+
         data
         |> Enum.reduce(
           {-1, 0},
-          fn(line, {increases, prev_line}) -> 
+          fn(line, {increases, prev_line}) ->
             case line > prev_line do
               true -> {increases + 1, line}
               false -> {increases, line}
@@ -27,7 +42,7 @@ defmodule Advent do
     end
 
     defmodule B do
-        
+
       def solve(data) do
         {answer, _, _} =
 
@@ -37,14 +52,14 @@ defmodule Advent do
           fn
             (line, {increases, {nil, nil}, nil}) -> {increases, {nil, line}, nil}
             (line, {increases, {nil, line1}, nil}) -> {increases, {line1, line}, line1 + line}
-            (line, {increases, {line1, line2}, old_sum}) -> 
+            (line, {increases, {line1, line2}, old_sum}) ->
               case line1 + line2 + line > old_sum do
                 true -> {increases + 1, {line2, line}, line1 + line2 + line}
                 false -> {increases, {line2, line}, line1 + line2 + line}
               end
           end
         )
-            
+
         answer
       end
     end
@@ -59,10 +74,10 @@ defmodule Advent do
     end
 
     defmodule A do
-        
+
       def solve(data) do
         {x, y} =
-        
+
         data
         |> Enum.reduce(
           {0, 0},
@@ -78,10 +93,10 @@ defmodule Advent do
     end
 
     defmodule B do
-      
+
       def solve(data) do
-        {x, y, _aim} = 
-        
+        {x, y, _aim} =
+
         data
         |> Enum.reduce(
           {0,0,0},
@@ -153,7 +168,7 @@ defmodule Advent do
     end
 
     defmodule A do
-      
+
       def solve(data) do
         {gamma, epsilon} =
         data
@@ -163,7 +178,7 @@ defmodule Advent do
           Enum.reduce(
             digit_list,
             {0,0},
-            fn (digit, {zeros, ones}) -> 
+            fn (digit, {zeros, ones}) ->
               case digit do
                 "0" -> {zeros + 1, ones}
                 "1" -> {zeros, ones + 1}
@@ -179,7 +194,7 @@ defmodule Advent do
           end
         )
         |> Day3.gamma_and_epsilon # decimal conversion
-        
+
         gamma * epsilon
       end
     end
@@ -262,7 +277,7 @@ defmodule Advent do
       end
 
       def solve(data) do
-        {generator_bits, scrubber_bits} = 
+        {generator_bits, scrubber_bits} =
           {data, data}
           |> filter_by_most_and_least_popular
 
@@ -277,6 +292,130 @@ defmodule Advent do
           |> Advent.Day3.bin_to_dec )
 
       end
+    end
+  end
+
+  defmodule Day4 do
+
+    def test_answer do
+      4512
+    end
+
+    def test_data do
+      """
+      7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
+
+      22 13 17 11  0
+      8  2 23  4 24
+      21  9 14 16  7
+      6 10  3 18  5
+      1 12 20 15 19
+
+      3 15  0  2 22
+      9 18 13 17  5
+      19  8  7 25 23
+      20 11 10 24  4
+      14 21 16 12  6
+
+      14 21 17 24  4
+      10 16 15  9 19
+      18  8 23 26 20
+      22 11 13  6  5
+      2  0 12  3  7\
+      """
+      |> parse_bingo
+    end
+
+    def parse_bingo(bingo_string) do
+      [called_string | [board_string]] =
+        bingo_string
+        |> String.split(~r/\n/, parts: 2)
+
+      called =
+        called_string
+        |> String.split(",")
+        |> Enum.map(&String.to_integer/1)
+
+      boards =
+        board_string
+        |> String.split(~r/\n\n/)
+        |> Enum.map(fn board -> String.split(board, ~r/ |\n/, trim: true) |> Enum.map(&String.to_integer/1) end)
+
+      {called, boards}
+      |> IO.inspect(label: "input")
+    end
+
+    defmodule A do
+      def solve({called, boards}) do
+        called
+        |> check_called(boards)
+      end
+
+      def check_called([current | rest], boards) do
+        IO.puts("checking #{current}")
+        case check_boards(current, boards) do
+          false -> check_called(rest, Enum.map(boards, &filter_board(&1, current)))
+          board ->
+            board
+            |> filter_board(current)
+            |> score(current)
+        end
+      end
+
+      def check_boards(_, []) do
+        false
+      end
+      def check_boards(number, [board | rest]) do
+        case win?(number, board) do
+          true -> board
+          false -> check_boards(number, rest)
+        end
+      end
+
+      def win?(number, board) do
+        win_horizontal?(number, board) || win_vertical?(number, board)
+      end
+
+      def win_horizontal?(_, []), do: false
+      def win_horizontal?(number, [a, b, c, d, e | rest]) do
+        ((number in [a, b, c, d, e]) &&
+         (Enum.count([a, b, c, d, e], fn x -> x == -1 end) == 4)) ||
+        win_horizontal?(number, rest)
+      end
+
+      def win_vertical?(number, board) do
+        new_board =
+          board
+          |> Enum.chunk_every(5)
+          |> Enum.zip
+          |> Enum.map(&Tuple.to_list/1)
+          |> List.flatten
+
+        win_horizontal?(number, new_board)
+      end
+
+      def score(board, number) do
+        (board
+         |> Enum.filter(fn x -> x != -1 end)
+         |> Enum.sum)
+
+        *
+
+        number
+      end
+
+      def filter_board(board, number) do
+        board
+        |> Enum.map(
+          fn x ->
+            case x == number do
+              true -> -1
+              false -> x
+            end
+          end
+        )
+      end
+
     end
   end
 end
