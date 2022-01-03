@@ -19,6 +19,8 @@ defmodule Advent do
       260
       263\
       """
+      |> String.split("\n")
+      |> Enum.map(&String.to_integer/1)
     end
 
     defmodule A do
@@ -38,6 +40,10 @@ defmodule Advent do
         )
 
         answer
+      end
+
+      def test_answer do
+        7
       end
     end
 
@@ -62,6 +68,10 @@ defmodule Advent do
 
         answer
       end
+
+      def test_answer do
+        5
+      end
     end
   end
 
@@ -72,6 +82,20 @@ defmodule Advent do
       |> String.split("\n")
       |> Enum.map(fn line -> String.split(line, " ") end)
     end
+
+    def test_data do
+      """
+      forward 5
+      down 5
+      forward 8
+      up 3
+      down 8
+      forward 2\
+      """
+      |> String.split("\n")
+      |> Enum.map(fn line -> String.split(line, " ") end)
+    end
+
 
     defmodule A do
 
@@ -89,6 +113,10 @@ defmodule Advent do
         )
 
         x * y
+      end
+
+      def test_answer do
+        150
       end
     end
 
@@ -109,6 +137,10 @@ defmodule Advent do
 
         x * y
       end
+
+      def test_answer do
+        900
+      end
     end
   end
 
@@ -120,25 +152,24 @@ defmodule Advent do
     end
 
     def test_data() do
-"00100
-11110
-10110
-10111
-10101
-01111
-00111
-11100
-10000
-11001
-00010
-01010"
+      """
+      00100
+      11110
+      10110
+      10111
+      10101
+      01111
+      00111
+      11100
+      10000
+      11001
+      00010
+      01010\
+      """
       |> String.split("\n")
       |> Enum.map(fn line -> String.split(line, "", trim: true) end)
     end
 
-    def test_answer() do
-      198
-    end
 
     def gamma_and_epsilon(data) do
       {
@@ -196,6 +227,11 @@ defmodule Advent do
         |> Day3.gamma_and_epsilon # decimal conversion
 
         gamma * epsilon
+      end
+
+
+      def test_answer() do
+        198
       end
     end
 
@@ -292,14 +328,14 @@ defmodule Advent do
           |> Advent.Day3.bin_to_dec )
 
       end
+
+      def test_answer do
+        230
+      end
     end
   end
 
   defmodule Day4 do
-
-    def test_answer do
-      4512
-    end
 
     def test_data do
       """
@@ -354,6 +390,10 @@ defmodule Advent do
       def solve({called, boards}) do
         called
         |> check_called(boards)
+      end
+
+      def test_answer do
+        4512
       end
 
       def check_called([current | rest], boards) do
