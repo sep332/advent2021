@@ -326,6 +326,11 @@ defmodule Advent do
       |> parse_bingo
     end
 
+    def real_data do
+      File.read!("day4.txt")
+      |> parse_bingo
+    end
+
     def parse_bingo(bingo_string) do
       [called_string | [board_string]] =
         bingo_string
@@ -342,7 +347,7 @@ defmodule Advent do
         |> Enum.map(fn board -> String.split(board, ~r/ |\n/, trim: true) |> Enum.map(&String.to_integer/1) end)
 
       {called, boards}
-      |> IO.inspect(label: "input")
+      #|> IO.inspect(label: "input")
     end
 
     defmodule A do
@@ -352,7 +357,7 @@ defmodule Advent do
       end
 
       def check_called([current | rest], boards) do
-        IO.puts("checking #{current}")
+        #IO.puts("checking #{current}")
         case check_boards(current, boards) do
           false -> check_called(rest, Enum.map(boards, &filter_board(&1, current)))
           board ->
